@@ -1,0 +1,219 @@
+# chapter 1
+
+### ML分为3种类型
+- Supervised Learning 监督学习
+	- CLassification 分类
+	- Regression 回归
+- Unsupervised Learning 无监督学习
+	- Clustering 聚类
+	- Dimensionality Reduction 降维
+
+- Reinforcement Learning 强化学习
+	- 有一个reward函数来给出reword signal，所以某种意义上也是一种监督式学习
+
+### 术语
+- Martix
+	- 矩阵：sample是行，feature是列
+	- sample先写，feature后写 （n*m的时候）
+	- X大写是矩阵
+- Vector 向量
+	- x小写是向量
+- 元素
+	- 上标是sample，下标是feature
+
+
+# chapter 2
+## perceptron
+模拟大脑神经元的工作方式，要么传递信号，要么不传递（看是否突破一个阈限值）。
+net input funcion网络输入函数
+activation function 激活函数
+unit step function 单位跃迁函数（或叫做Heaviside step function）
+learning rate（学习率）
+我们可以设置最大训练集迭代次数或可容忍错误分类样本数（a maximum number of passes over the training dataset (epochs) and/or a threshold for the number of tolerated misclassifcations）来停止算法的学习过程。
+
+>code: ML_chapter2_Perceptron
+
+
+##Adaptive linar nenurons（Adaline）自适应线性神经元
+Adaline与perceptron的区别在于权重更新（a quantizer）建立在一个线性激活函数，而不是一个单位跃迁函数
+
+##用梯度下降算法gradient descent最小化损失函数cost function
+> PML_chapter2_AdalineGD
+学习率的取值过大，会导致每次迭代不是减少损失函数值而是增大，取值过小，每次减小的幅度太小，至少需要上百轮迭代才能收敛，导致算法收敛的时间巨长，不能用在解决实际问题
+特征缩放有助于算法收敛，比如标准化standardizaion和归一化normalization
+standardization可以用Numpy的mean和std方法
+
+## 大规模机器学习和随机梯度下降stochastic gradient desecnt
+>PML_chapter2_AdalienSGD
+
+
+# chapter 3
+## 选择模型的5步
+1. selection of features特征选择
+2. choosing a performance metric选择性能评价指标
+3. choosing a classifier and optimization algorithm选择分类器和优化算法
+4. evaluating the performance of the model评估模型的性能
+5. tuning the algorithm模型调参
+
+## 用scikit-learn库做perceptron
+>PML_chapter3_perceptron_via_scikit-learn
+### ！ 如果数据本身不够线性可分，那么perceptron就很难收敛，这是为什么不推荐感知机算法的原因
+
+## 用logistic regression做类别概率建模modeling class probabilities
+### logisitic叫回归，但其实是一种分类算法classification
+odds ratio 几率
+>PML_chapter3_perceptron_via_scikit-learn
+
+## 使用正则化regularization处理过拟合overfitting情况
+### 在bias-variance之间找平衡，常用的方法是正则化（regularization）最常见的是L2正则（也叫权重衰减，L2收缩）
+
+## 支持向量机SVM support vector machines
+
+### SVM可以看做是perceptron的拓展
+However，在perceptron中，么最小化错误分类误差；在SVM中，我们寻求最大化间隔margin
+
+## 使用松弛变量slack variance解决非线性可分的情况
+>PML_chapter3_perceptron_via_scikit-learn
+### 有时候数据太大，不能放入内存，或者在线处理流数据，则使用scikit-learn的SGDClassifier类，其中的partical_fit方法支持onlinelearning
+
+## 用kernel SVM解决非线性可分问题
+gamma相当于一个高斯球面的参数，gamma越大，对分类越有帮助，但会导致模型泛化能力变弱
+
+## 决策树学习decision tree learning
+决策树算法的解释力会更好
+决策树中追求最大化信息增益information gain(IG)，然后迭代。有三种情况会导致递归返回：
+1. 当前节点包含的样本全属于同一类别，无需划分；
+2. 当前属性集为空，或者是所有样本在所有属性上取值相同，无法划分；
+3. 当前节点包含的样本集合为空，不能划分；
+
+
+
+## 随机森林random forests
+### 一个随机森林，就是多个决策树的集合
+
+## K近邻（KNN），一个懒惰学习算法 k-nearest neighbors - a lazy learning algorithm
+
+### 参数模型VS变参模型
+- 参数模型，ML中，我们通过训练来学习一个函数，重点是评估函数的参数，然后对于test dataset，直接用学习到的函数对其分类，比如Perceptron、LogisticRegression、SVM；
+- 变参模型的参数个数不固定，参数个数会随着训练集增大而增多，所以nonparametric不是无参模型而是变参模型，比如决策树、随机森林、核SVM以及KNN
+
+# chapter 4
+## 处理缺失值missing data
+> PML_Chapter4_DataPreprocessing
+## 消除带有缺失值的特征或样本eliminating samples or features with missing values
+
+### 方法1：去掉缺失值的特征（列）或样本（行）
+- 去掉行用dropna()
+- 去掉列用dropna(axis=1)
+
+## 直接删掉样本，太可惜。处理缺失值的常用方法：插入法（interpolation）
+### imputing missing values改写缺失值
+思路是用一个估计值来替代缺失值，最常用的是均值估计法mean imputation，即用整个特征列的均值来代替这一列的缺失值
+## 理解scikit-learn中的Estimator API
+在sklearn中Imputer类属于transformer类，其中包括fit和transform两个方法，fit用来从训练样本中学习参数，transform用来使用参数转换数据。任何要进行transfrom的数据的特征维度必须和fit时的数据特征维度相同。
+## 处理分类数据categorical data
+nominal feature 定类
+ordinal feature 定序
+numerical feature 定距
+
+## 映射有序特征 mapping ordinal features
+### 要把string values转成整数integers，由于没有现成函数做这件事，所以我们得手工完成mapping
+
+### 对类别进行编码 encoding class labels
+## 对离散特征进行独热编码performing one-hot encoding on nominal features
+可以使用sklearn的OneHotEncoder或者pandas的get_dummies
+
+## 将数据集分割为训练集和测试集
+### 一种简单的方法是sklearn.cross_validation中的train_test_split方法
+## 统一特征取值范围 birng features onto the same scale
+### feature scaling特征缩放这一步非常关键
+有2种方法可以做特征缩放
+1. 归一化（normalization），将特征范围缩放到[0,1]，是最小-最大缩放（min-max scaling）的特例
+2. 标准化(standardization)，更实用的方法，将特征缩放到以0为中心，标准差为1的范围，之后特征形式符合正态分布，另外，标准化后的数据保持了异常值中的有用信息，使得算法对异常值不太敏感
+
+- 归一化使用MinMaxScaler
+- 标准化使用StandardScaler
+
+## 选择有意义的特征 selecting meaningful features
+如果模型在训练集上效果好过测试集上太多，就说明模型过拟合了overfitting。过拟合意味着高方差。过拟合的一个原因是模型太复杂了。一般的解决方案是减少泛化误差generalization error
+- 收集更多的训练数据
+- 正则化，引入模型复杂度的惩罚项 introduce a penalty for complexity via regularization
+- 选择一个更简单的参数更少的模型 choose a simpler model with fewer parameters
+- 降低数据的维度 reduce the dimensionality of the data
+
+## L1正则
+L2正则是权重参数的平方和，L1正则是权重参数的绝对值和
+相比L2，L1正则趋向于得到稀疏特征向量，即很多特征权重参数为0.如果数据集的特征维度很高且特征不相干（极端情况是 不相干的特征维度数目比训练样本数还大），特征稀疏性是非常有用的。
+
+## 序列特征选择算法 sequential feature selection algorithms
+另外一种减少模型复杂度和避免过渡拟合的方法是通过特征选择进行维度降低 dimensionality reduction.该方法尤其对非正则模型有用。维度降低有两种做法：特征选择feature selection和特征抽取feature extraction
+
+序列特征选择算法属于贪心搜索算法greedy search algorithm，用于将原始的d维度特征空间降低到k维度特征子控件（k<d）
+一个经典的序列特征选择算法是序列后向选择(sequential backward selection,SBS)
+
+
+## 利用随机森林评估特征重要性assessing feature importance with random forests
+
+前面学习了如何利用l1正则将不相干特征变为0，使用SBS算法进行特征选择，另一种从数据集中选择相关特征的方法是利用随机森林
+
+
+# chapter5 通过降维压缩数据
+上一章讲的降维主要是特征选择，本章主要是特征抽取
+## PCA进行无监督降维 upsupervised dimensionality reduction via principal component analysis
+
+### PCA方向极其容易收到数据中特征范围影响，所以在运用PCA前一定要做特征标准化，才能保证每维度的重要性等同
+
+> PML_chapter5_Compressing_data_via_DimensionalityReduction
+ 
+## 特征转换 feature transformation
+
+## LDA进行监督数据压缩 supervised data compression via linear discriminant analysis（线性判别分析）
+
+### LDA是另一种用于特征抽取的技术，它可以提高计算效率，对于非正则模型也能减小过拟合
+LDA与PCA很像，但两者目标不同。PCA的目标是找到正交的主成分同时保持数据集的最大方差，LDA的目标是为每个类单独优化，得到各个类的最优特征子集
+PCA是无监督算法，LDA是监督算法。如果每个类的样本比较好，PCA预处理数据得到的结果比LDA好
+
+## 使用核PCA进行非线性映射 using kernal principal component analysisi for nonlinear mappings
+
+### 2个例子
+
+# chapter6 模型评估和调参
+## 训练一个好的ML模型，需要模型评估和参数寻优
+## 通过管道创建工作流 pipelines(Sklearn中的pipeline类)
+> PML_chapter6_ModelEvaluation&Hyperparameter_Turning
+### 注意：管道执行fit方法，而transformer要执行fit_transform
+
+## K折交叉验证评估模型性能 using k-fold cross-validation to assess model performance
+### 交叉验证是如何评估模型泛化能力的方差
+### 有2种方法：holdout 和 k-fold两种验证方法
+#### holdout就是将数据分为：训练集、验证集和测试集
+#### K-fold是重复k次的holdout，以提高鲁棒性
+
+## 使用学习曲线和验证曲线，调试算法 Debugging algorithms with learning and validation curves
+
+### 学习曲线可以判断学习算法是否过拟合或者欠拟合
+- 模型偏差bias过高，就是欠拟合，解决的方法就是增加模型参数，比如构建更多的特征，减少正则项
+- 模型方差variance过高，就是过拟合，解决方法有增大训练集或者降低模型复杂度，比如增大正则项，或通过特征选择减少特征数
+
+
+## 用验证曲线解决过拟合和欠拟合
+### 验证曲线与学习曲线，不同的是滑出的是不同参数下模型的准确率而不是不同训练集大小下的准确率
+
+## 通过网格搜索调参 Fine-tuning ML models via grid search
+
+## 通过嵌套交叉验证选择算法 algorithm selection with nested cross-validation
+
+### 除了accuracy这个指标，查准率（precision）、查全率(recall)，F1值（F1-score）都是不错的评价Model性能的指标
+
+## 混淆矩阵 confusion matrix,能够展示学习算法表现的矩阵
+## 混淆矩阵是一个平方矩阵，其中记录了一个分类器的TP(true positive)、TN(ture negative)、FP(false positive)和FN(false negative)
+
+
+## 优化分类模型的查准率和查全率 optimizing the precision and recall of a classification model
+
+# chapter 7 集成学习 combining different models for ensemble learning
+
+## 只要单分类器的表现不太差，集成学习的结果总是要好于单分类器
+
+
+
