@@ -220,3 +220,5 @@ ax = data.plot.scatter(x = 'A', y = 'B', color = 'DarkBlue', label = 'Class1')
 data.plot.scatter(x = 'A', y = 'C', color = 'LightGreen', label = 'Class2', ax = ax)
 plot.show()
 
+
+
