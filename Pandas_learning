@@ -1,0 +1,94 @@
+# Pandas 学习
+## pandas更像一个字典的numpy，比如可以对每一列设置一个名字
+
+import numpy as np
+import pandas as pd
+
+s = pd.Series([1,3,6,np.nan,44,1]) # 设置一个序列，注意S是大写
+dates = pd.date_range('20180101', periods = 6) #生成一个DatetimeIndex['2018-01-01','2018-01-02','2018-01-03','2018-01-04','2018-01-05','2018-01-06']
+## 定义DataFrame的方法一：指定行、列标签
+df = pd.DataFrame(np.random.randn(6,4), index = datas, columns = ['a','b','c','d']) # 建一个DataFrame，类似Numpy中的二维矩阵，每行是一个日期，列分别是abcd
+## 定义DataFrame的方法二：用字典
+df_2 = pd.DataFrame({
+	'A':1., 
+	'B':pd.Timestamp('20130102'), 
+	'C':pd.Series(1, index= list(range(4)),dtype = 'float32'), 
+	'D':np.array([3]*4, dtype='int32'),
+	'E':pd.Categorical(["test","train","test","train"]),
+	'F':'foo'
+	})
+
+## 查看DataFrame的类型
+df.dtypes # 不用括号，因为这是dataframe的属性
+
+## 查看行的序号
+df.index
+
+## 查看列的名字
+df.columns
+
+## 查看数值
+df.values
+
+## 查看统计数据
+df.describe() #会返回每一列的count,mean,std,min,25%,50%,75%,max；日期、字符串等非数字values，该命令不会显示
+
+## Dateframe的转置
+df.T
+
+## 排序
+df.sort_index(axis = 1, ascending = False) #对列按倒序排序，结果列标：FEDCBA
+df.sort_index(axis = 0, ascending = False) #对行按倒序排序，结果行标：3210
+df.sort_values(by='E') #按E列的值排序
+
+## pandas取值
+dates = pd.data_range('20180101', periods = 6)
+df = pd.DataFrame(np.arange(24).reshape((6,4), index = dates, columns = ['A','B','C','D'])
+### 简单的选择
+print(df['A'], df.A) # 两者等同
+print(df[0:3],df['20180101':'20180103'])  # 两者等同
+### 高级的选择
+#### select  by label:loc
+print(df.loc['20180101']) # 选择该日期的一行
+print(df.loc[:,['A','B']]) # 选择所有行和A，B两列
+print(df.loc['20180101', ['A', 'B']]) # 只选择20180101这一行的A，B两列；注意，loc都是标签，所以都是用标签去选择
+#### select by position: iloc
+print(df.iloc[3]) # 选择第三行的数据
+print(df.iloc[3,0]) # 选择第三行第一列的数据
+print(df.iloc[3:5, 1:3]) #切片筛选
+print(df.iloc[[1,3,5],1:3]) #非连续的逐个筛选
+#### mixed select by label & position:ix
+print(df.ix[3:, ['A', 'C']]) # 行是用position选，列是用label选的mixed select
+#### Boolean indexing select
+print(df[df.A > 8]) #筛选所有A列数值大于8的dataframe
+
+## pandas 设置值
+dates = pd.data_range('20180101', periods = 6)
+df = pd.DataFrame(np.arange(24).reshape((6,4), index = dates, columns = ['A','B','C','D'])
+### 用iloc，赋值
+df.iloc[2,2] = 111 ## 第3行第3列赋值为111
+### 用loc，赋值
+df.loc['20180102', 'B'] = 222
+### 用ix赋值，同理
+### boolean indexing
+df[df.A > 4] = 0 #所有A列大于4的dataframe，每行每列的数值都变成0
+df.A[df.A > 4] = 0 #所有A列数值大于4的A列数值，都变成0，其他列数据不变
+df['F'] = np.nan #新增F列，并都设值为NAN
+df['E'] = pd.Series([1,2,3,4,5,6], index= pd.date_range('20180101', periods = 6)) # 新增E列，要用原来dataframe的相同行标签，这样才能对其，然后用一个list把每一行的数值传进去
+
+## 处理缺省值
+dates = pd.data_range('20180101', periods = 6)
+df = pd.DataFrame(np.arange(24).reshape((6,4), index = dates, columns = ['A','B','C','D'])
+df.iloc[0,1] = np.nan
+df.iloc[1,2] = np.nan
+### 丢掉nan：dropna
+print(df.dropna(axis = 0, how = 'any')) # 丢掉有any（任何）缺省值的行；how={'any','all'}，其中any是有一个nan就触发，all是只有所有都nan才触发；默认值是any
+print(df.dropna(axis = 1)) #丢掉有任何nan的列
+### 继续用nan：fillna
+print(df.fillna(value = 0)) #把nan填成0
+### 检查有没有nan
+print(df.isnull()) 
+print(np.any(df.isnull()==True) #检查所有数据中是否有nan
+
+
+
