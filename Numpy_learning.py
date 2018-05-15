@@ -4,7 +4,7 @@
 import numpy as np 
 
 ##把一个列表转为矩阵
-array = np.array([[1.,2,3],[4,5,6]])
+array = np.array([[1,2,3],[4,5,6]])
 print array
 
 ## 查看矩阵的维度
@@ -163,3 +163,4 @@ print(np.hsplit(A,2)) #横向切割，结果是原来前两列和后两列，分
 ### copy()的赋值方法没有关联性
 b = a.copy() #也就是deep copy
 
+# 啥时候复习哈
