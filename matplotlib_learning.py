@@ -320,3 +320,4 @@ ani.save('basic_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])# å¦‚æ
 
 
 # first learn on May 7th,2018
+# revised on May 15th, 2018

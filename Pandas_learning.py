@@ -96,6 +96,7 @@ print(np.any(df.isnull()==True) #检查所有数据中是否有nan
 ### pd.read的文档：http://pandas.pydata.org/pandas-docs/stable/io.html
 
 import pandas as pd
+
 data = pd.read_csv(~/desktop/student.csv)
 print(data)
 ##保存到pickle格式
@@ -121,7 +122,7 @@ res = pd.concat([df1,df2,df3], axis = 0, ignore_index = True) # 重置index（�
 df4 = pd.DataFrame(np.ones((3,4))*0, columns = ['a','b','c','d'], index = [1,2,3])
 df5 = pd.DataFrame(np.ones((3,4))*1, columns = ['b','c','d','e'], index = [2,3,4])
 #### outer join
-res2 = pd.concat([df4,df5], jion = 'outer')
+res2 = pd.concat([df4,df5], join = 'outer')
 # or
 res2 = pd.concat([df4,df5]) # 默认是outer
 # outer join 会把所有列都保留，没有数值的位置自动填充NaN
