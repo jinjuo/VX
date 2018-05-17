@@ -1,6 +1,13 @@
 # Pandas 学习
 ## pandas更像一个字典的numpy，比如可以对每一列设置一个名字
 
+# pandas 是基于 Numpy 构建的，让以 Numpy 为中心的应用变得更加简单。
+# pandas主要包括三类数据结构，分别是：
+# Series：一维数组，与Numpy中的一维array类似。二者与Python基本的数据结构List也很相近，其区别是：List中的元素可以是不同的数据类型，而Array和Series中则只允许存储相同的数据类型，这样可以更有效的使用内存，提高运算效率。
+# DataFrame：二维的表格型数据结构。很多功能与R中的data.frame类似。可以将DataFrame理解为Series的容器。以下的内容主要以DataFrame为主。
+# Panel ：三维的数组，可以理解为DataFrame的容器。
+# Pandas官网，更多功能请参考http://pandas-docs.github.io/pandas-docs-travis/index.html
+
 import numpy as np
 import pandas as pd
 
@@ -63,6 +70,8 @@ print(df.iloc[[1,3,5],1:3]) #非连续的逐个筛选
 print(df.ix[3:, ['A', 'C']]) # 行是用position选，列是用label选的mixed select
 #### Boolean indexing select
 print(df[df.A > 8]) #筛选所有A列数值大于8的dataframe
+### 使用isin()方法过滤在指定列中的数据
+df[df['high'].isin([0.00, 9.00])] #筛选df数据中high列中是0或者9的数据
 
 ## pandas 设置值
 dates = pd.data_range('20180101', periods = 6)
@@ -91,6 +100,10 @@ print(df.fillna(value = 0)) #把nan填成0
 ### 检查有没有nan
 print(df.isnull()) 
 print(np.any(df.isnull()==True) #检查所有数据中是否有nan
+
+## 查看重复的数据
+z.duplicated()
+
 
 ## 导入导出数据
 ### pd.read的文档：http://pandas.pydata.org/pandas-docs/stable/io.html

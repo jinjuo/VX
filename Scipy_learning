@@ -1,0 +1,184 @@
+# Scipy learning
+
+###SciPy是世界上著名的Python开源科学计算库，建立在Numpy之上。它增加的功能包括数值积分、最优化、统计和一些专用函数。
+
+# 本篇文档包括以下内容：  
+# 1、文件的输入/输出；  
+# 2、统计；  
+# 3、信号处理；  
+# 4、最优化；  
+# 5、插值
+
+## 1 scipy.io文件的输入和输出
+from scipy import io as spio
+import numpy as np
+# 保存文件
+a = np.ones((3, 3))
+spio.savemat('file.mat', {'a': a})
+# 导入文件
+data = spio.loadmat('file.mat', struct_as_record=True)
+print(data)
+# 其他
+# 载入txt文件：numpy.loadtxt()/numpy.savetxt()
+# 智能导入文本/csv文件：numpy.genfromtxt()/numpy.recfromcsv()
+# 高速，有效率但numpy特有的二进制格式：numpy.save()/numpy.load()
+
+## 2 统计
+### 2.1 分析随机数
+import scipy.stats as stats
+# 生成正态分析的随机数
+generated = stats.norm.rvs(size = 900)
+print(generated)
+# 用正态分布去拟合生成的数据，得到均值和标准差
+Mean,std = stats.norm.fit(generated)
+print('Mean = ',Mean,',std = ',std)
+
+# [偏度（skewnes）](http://baike.baidu.com/link?url=pYYIZK6nt71PTR3rzRhF-wuOZv0Wwr2hRysRQUMDhGPCivoUYwXqa2zvwbTTDbFlipFDP7-R-J0FnDOS2SImQ6OdFGGBqYvtza5Ot_1Eagq)
+# 描述的是概率分布的偏斜程度，我们需要做一个偏度检验。
+# 该检验有两个返回值，其中第二个返回值是p-value，即观察到的数据服从正态分布的概率，取值为0-1
+stats.skewtest(generated)
+
+# [峰度（kurtosis）](http://baike.baidu.com/link?url=TO4FcebhoNG72usc6Ea9rE2Jv4weUpHEqDiLIYN521_Pm04ZhVl1xcbYaMZy26olBDFEp-O_8wJxYXACqVofmNyHn9A1aIkH6iwwb1kzrru)
+# 描述的是概率分布的陡峭程度。该检验和偏度检验类似。
+stats.kurtosistest(generated)
+
+# [正态性检验（normality test）](http://baike.baidu.com/link?url=zxoyO2axAS8j7z2IEL1ASapVZavj9Z2iLUaB0vEHzTfaCsOozm73wq7gbajDPMlZ5BJI3mxhsOPAvLaC8cuCkNhZi2nO8oBIiuYdkQbTkgPlW45GhYgzj9VNQSZlCpTC6vOLt4D9Cvpp5Thb6ulI1q)
+# 可以检验数据服从正太分布的程度。
+stats.normaltest(generated)
+
+# 使用Scipy我们很方便的得到数据所在区域中某一百分比处的数值
+# 例如得到95%处的数值
+stats.scoreatpercentile(generated,95)
+# 同样，可以反过来，得到数值所在的百分比
+stats.percentileofscore(generated,1)
+
+# 使用matplot绘制生成数据的分布直方图
+import matplotlib.pyplot as plt
+plt.hist(generated)
+plt.show()
+
+## 2.2 样本比对（比较股票对数收益率）
+import numpy as np
+price = get_price(['000001.XSHE','601398.XSHG'],start_date = '2016-01-01',end_date = '2017-01-01',fields='close')
+price_001 = np.diff(np.log(np.array(price['000001.XSHE'])))
+price_398 = np.diff(np.log(np.array(price['601398.XSHG'])))
+# 均值检验可以检验两组不同的样本是否有相同的均值，返回值有两个，其中第二个为p-value,取值范围为0~1
+stats.ttest_ind(price_001,price_398)
+
+# Kolmogorov-Smirnov检验可以判断两组样本同分布的可能性
+stats.ks_2samp(price_001,price_398)
+
+# 在两支股票对数收益率的差值上运用Jarque-Bera正态性检验
+stats.jarque_bera(price_001 -price_398)[-1]
+
+
+
+## 3 信号处理
+## 3.1 检验股价的线性趋势
+rom datetime import date,datetime,time
+from scipy import signal
+import pandas as pd
+from matplotlib.dates import DateFormatter
+from matplotlib.dates import DayLocator
+from matplotlib.dates import MonthLocator
+price = get_price('000001.XSHE',start_date = '2016-01-01',end_date = '2017-01-01',fields='close')
+y = signal.detrend(price)
+trend = pd.Series(np.array(price) - y,index = price.index)
+trend
+
+# 可以看下面去除趋势的作用
+help(signal.detrend)
+trend.plot()
+
+## 3.2 傅里叶分析
+
+### 对去除趋势后的信号进行滤波
+from scipy import fftpack
+# 运用傅里叶变换，得到信号的频谱
+amps = np.abs(fftpack.fftshift(fftpack.rfft(y)))
+# 过滤噪音，如果某一频率分量的大小低于最强分贝的10%，过滤
+amps[amps < 0.1*amps.max()] = 0
+# 将过滤后的信号返回时域，并和去除趋势后的信号一起绘制出来
+plt.plot(price.index,y,label = 'datrended')
+plt.plot(price.index,-fftpack.irfft(fftpack.ifftshift(amps)),label = 'filtrend')
+
+## 4 数学优化
+
+# 优化算法尝试寻求某一问题的最优解，例如找到函数的最大值或最小值，函数可以是线性的也可以是非线性的。解可能也有一定的约束，例如大于1，。在scipy.optimize模块中提供了一些优化算法，包括最小二乘法。
+
+### 4.1拟合正弦波
+# 在上一章节，我们为去除趋势后的数据创建了一个简单的滤波器。我们可以回忆一下，一个正弦波优四个参数决定 Asin(ωx+φ)+k。  
+# A——振幅，当物体作轨迹符合正弦曲线的直线往复运动时，其值为行程的1/2。  
+# (ωx+φ)——相位，反映变量y所处的状态。  
+# φ——初相，x=0时的相位；反映在坐标系上则为图像的左右移动。  
+# k——偏距，反映在坐标系上则为图像的上移或下移。  
+# ω——角速度， 控制正弦周期(单位角度内震动的次数)。
+
+# 定义正弦波模型
+def residuals(p,y,x):
+    A,k,theta,b = p
+    err = y-A*np.sin(2*np.pi*k*x+theta)+b
+    return err
+
+# 将滤波后的信号变换为时域
+filtered = -fftpack.irfft(fftpack.ifftshift(amps))
+pd.Series(filtered,index = price.index).plot()
+
+N = len(filtered)
+f = np.linspace(-N/2,N/2,N)
+p0 = [filtered.max(),f[amps.argmax()]/(2*N),0,0]
+p0
+
+# 调用leastsp函数
+from scipy import optimize
+plsq = optimize.leastsq(residuals,p0,args = (filtered,f))
+p = plsq[0]
+p
+fig = plt.figure()
+plt.plot(price.index,y,'o',label = 'detrended')
+plt.plot(price.index,filtered,label = 'filtered')
+plt.plot(price.index,p[0]*np.sin(2*np.pi*f*p[1]+p[2])+p[3],'^',label = 'fit')
+plt.legend(prop = {'size':'x-large'})
+
+
+
+
+## 4.2积分（以高斯积分为例）
+# 高斯积分在概率论和连续傅里叶变换等的统一化等计算中有广泛的应用。
+# 在误差函数的定义中它也出现。虽然误差函数没有初等函数，但是高斯积分可以通过微积分学的手段解析求解。
+from scipy import integrate
+integrate.quad(lambda x: np.exp(-x**2),-np.inf,np.inf)
+np.sqrt(np.pi)
+# 最常用的数值积分方法是quad,其它可用的积分方案有fixed_quad,quadrature,romberg.
+
+
+## 插值
+# 创建数据并添加噪音
+x = np.linspace(-18,18,36)
+noise = 0.1*np.random.random(len(x))
+signal = np.sin(x) +noise
+
+from scipy import interpolate
+# 创造一个线性插值函数
+interpreted = interpolate.interp1d(x,signal)
+x2 = np.linspace(-18,18,180)
+y = interpreted(x2)
+
+# 执行前一步相同的操作，这里使三次插值
+cubic = interpolate.interp1d(x,signal,kind = 'cubic')
+y2 = cubic(x2)
+
+plt.plot(x,signal,'o',label = 'data')
+plt.plot(x2,y,'-',label = 'lenear')
+plt.plot(x2,y2,'-',lw = 2,label = 'cubic')
+
+
+
+
+
+
+
+
+
+
+

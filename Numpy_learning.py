@@ -132,6 +132,8 @@ for column in A.T: #python没有内置的取列功能，所以我们先把矩阵
 for item in A.flat: #先把矩阵拉平，变成一行的数列，再一个一个取出来
 	print(item)
 print(A.flatten()) #可以看到矩阵拉平后的效果。.flatten()与.flat的区别在于，后者只是一个迭代器，不会return具体的数值
+# 也可以用A.ravel() 
+# flatten()返回的是真实的数组，需要分配新的内存空间；而ravel()函数返回的只是数组的视图。
 
 ## 矩阵的合并与分割
 ### 先准备2个array
@@ -157,7 +159,7 @@ print(np.array_split(A, 3, axis = 1)) #纵向不等量切割，该函数会把ar
 #### 也可以：
 print(np.vsplit(A,3)) #纵向切割，结果是原来的每一行成为新的array
 print(np.hsplit(A,2)) #横向切割，结果是原来前两列和后两列，分别成为新的array
-
+np.dsplit(a,3) #按深度切割
 
 ## array的赋值
 ### = 的赋值方法会带有关联性
