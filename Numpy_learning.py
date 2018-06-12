@@ -167,3 +167,44 @@ np.dsplit(a,3) #按深度切割
 b = a.copy() #也就是deep copy
 
 # 啥时候复习哈：0514.。。
+
+
+## 基础统计
+
+# d1.count()          #非空元素计算
+# d1.min()            #最小值
+# d1.max()            #最大值
+# d1.idxmin()         #最小值的位置，类似于R中的which.min函数
+# d1.idxmax()         #最大值的位置，类似于R中的which.max函数
+# d1.quantile(0.1)    #10%分位数
+# d1.sum()            #求和
+# d1.mean()           #均值
+# d1.median()         #中位数
+# d1.mode()           #众数
+# d1.var()            #方差
+# d1.std()            #标准差
+# d1.mad()            #平均绝对偏差
+# d1.skew()           #偏度
+# d1.kurt()           #峰度
+# d1.describe()       #一次性输出多个描述性统计指标
+
+# 自定义一个函数，将这些统计指标汇总在一起：
+def status(x) : 
+    return pd.Series([x.count(),x.min(),x.idxmin(),x.quantile(.25),x.median(),
+                      x.quantile(.75),x.mean(),x.max(),x.idxmax(),x.mad(),x.var(),
+                      x.std(),x.skew(),x.kurt()],index=['总数','最小值','最小值位置','25%分位数',
+                    '中位数','75%分位数','均值','最大值','最大值位数','平均绝对偏差','方差','标准差','偏度','峰度'])
+# 执行该函数，查看一下d1数据集的这些统计函数值：
+df = pd.DataFrame(status(d1))
+df
+
+# 在实际的工作中，我们可能需要处理的是一系列的数值型数据框，如何将这个函数应用到数据框中的每一列呢？可以使用apply函数，这个非常类似于R中的apply的应用方法。 
+# 将之前创建的d1,d2,d3数据构建数据框：
+df = pd.DataFrame(np.array([d1,d2,d3]).T, columns=['x1','x2','x3'])
+df.apply(status)
+
+
+
+
+
+
