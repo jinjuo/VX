@@ -70,7 +70,7 @@ odds ratio 几率
 ## 支持向量机SVM support vector machines
 
 ### SVM可以看做是perceptron的拓展
-However，在perceptron中，么最小化错误分类误差；在SVM中，我们寻求最大化间隔margin
+However，在perceptron中，最小化错误分类误差；在SVM中，我们寻求最大化间隔margin
 
 ## 使用松弛变量slack variance解决非线性可分的情况
 >PML_chapter3_perceptron_via_scikit-learn
